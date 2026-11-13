@@ -103,6 +103,77 @@
     html.stretch, html.stretch body { height: var(--full-h) !important; }
     html.stretch body { bottom: auto !important; }
   </style>
+  <script>
+    // Lyd med Web Audio: rask respons, og «ambient» så den blander seg med musikk og
+    // video i bakgrunnen (og følger lydløs-bryteren) i stedet for å pause dem.
+    window.chrimuhSound = (function () {
+      try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
+      var Ctx = window.AudioContext || window.webkitAudioContext;
+      if (!Ctx) return null;
+      var ctx = new Ctx({ latencyHint: 'interactive' });
+      var buf = {}, loopSrc = null;
+      function load(name) {
+        fetch('assets/assets/sounds/' + name + '.wav')
+          .then(function (r) { return r.arrayBuffer(); })
+          .then(function (a) { return new Promise(function (ok, no) { ctx.decodeAudioData(a, ok, no); }); })
+          .then(function (b) { buf[name] = b; })
+          .catch(function () {});
+      }
+      [50, 52, 54, 55, 57, 58, 60, 62, 63, 65, 67].forEach(function (n) { load('note_' + n); });
+      load('loop');
+      function unlock() { if (ctx.state !== 'running') ctx.resume(); }
+      ['pointerdown', 'touchstart', 'touchend', 'click'].forEach(function (e) {
+        document.addEventListener(e, unlock, true);
+      });
+      function play(name) {
+        var b = buf[name];
+        if (!b) return null;
+        unlock();
+        var s = ctx.createBufferSource();
+        s.buffer = b;
+        s.connect(ctx.destination);
+        s.start();
+        return s;
+      }
+      return {
+        note: function (n) { play('note_' + n); },
+        loop: function (on) {
+          if (on) {
+            if (loopSrc) return;
+            loopSrc = play('loop');
+            if (loopSrc) loopSrc.loop = true;
+          } else if (loopSrc) {
+            try { loopSrc.stop(); } catch (e) {}
+            loopSrc = null;
+          }
+        }
+      };
+    })();
+  </script>
+  <script>
+    // MIDLERTIDIG feilsøking: vises bare i en eventuell tom stripe nederst, bak appen.
+    window.addEventListener('load', function () {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;font:11px -apple-system,sans-serif;color:#444;padding:4px 8px calc(env(safe-area-inset-bottom) + 4px);z-index:-1;white-space:pre-wrap';
+      var ch = Object.getOwnPropertyDescriptor(Element.prototype, 'clientHeight');
+      function show() {
+        var vv = window.visualViewport;
+        var probe = document.createElement('div');
+        probe.style.cssText = 'position:fixed;top:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden';
+        document.body.appendChild(probe);
+        var cs = getComputedStyle(probe);
+        d.textContent = 'v3 standalone=' + !!navigator.standalone + ' inner=' + innerHeight + ' client=' + ch.get.call(document.documentElement) +
+          ' vv=' + (vv ? Math.round(Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height').get.call(vv)) + '/' + Math.round(vv.offsetTop) : '-') +
+          ' screen=' + screen.width + 'x' + screen.height + ' safe=' + cs.paddingTop + '/' + cs.paddingBottom +
+          ' body=' + Math.round(document.body.getBoundingClientRect().height) + ' class=' + document.documentElement.className;
+        probe.remove();
+      }
+      document.documentElement.appendChild(d);
+      show();
+      setTimeout(show, 1500);
+      window.addEventListener('resize', show);
+    });
+  </script>
 </head>
 <body>
   <!--
