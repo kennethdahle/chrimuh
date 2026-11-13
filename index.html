@@ -67,6 +67,42 @@
       }
     })();
   </script>
+  <script>
+    // iPhone-hjemskjermapp: Safari gir siden høyden «skjerm minus statuslinje», så det
+    // blir en tom stripe nederst. Her strekkes appen til hele skjermhøyden.
+    (function () {
+      if (!window.navigator.standalone) return;
+      var root = document.documentElement;
+      var ch = Object.getOwnPropertyDescriptor(Element.prototype, 'clientHeight');
+      function raw() { return ch.get.call(root); }
+      function full() {
+        var portrait = window.matchMedia('(orientation: portrait)').matches;
+        return portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
+      }
+      function gap() {
+        var d = full() - raw();
+        return d > 0 && d < 120 ? d : 0;
+      }
+      Object.defineProperty(root, 'clientHeight', { configurable: true, get: function () { return raw() + gap(); } });
+      var vv = window.visualViewport;
+      if (vv) {
+        var vh = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height');
+        Object.defineProperty(vv, 'height', { configurable: true, get: function () { return vh.get.call(vv) + gap(); } });
+      }
+      function apply() {
+        var g = gap();
+        root.classList.toggle('stretch', g > 0);
+        root.style.setProperty('--full-h', (raw() + g) + 'px');
+      }
+      apply();
+      window.addEventListener('resize', apply);
+      window.addEventListener('orientationchange', function () { setTimeout(apply, 300); });
+    })();
+  </script>
+  <style>
+    html.stretch, html.stretch body { height: var(--full-h) !important; }
+    html.stretch body { bottom: auto !important; }
+  </style>
 </head>
 <body>
   <!--
