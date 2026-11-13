@@ -87,7 +87,7 @@
       var vv = window.visualViewport;
       if (vv) {
         var vh = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height');
-        Object.defineProperty(vv, 'height', { configurable: true, get: function () { return vh.get.call(vv) + gap(); } });
+        Object.defineProperty(vv, 'height', { configurable: true, get: function () { return Math.min(vh.get.call(vv) + gap(), full()); } });
       }
       function apply() {
         var g = gap();
@@ -151,10 +151,10 @@
     })();
   </script>
   <script>
-    // MIDLERTIDIG feilsøking: vises bare i en eventuell tom stripe nederst, bak appen.
+    // MIDLERTIDIG feilsøking: viser skjermmålene i en boks midt på skjermen.
     window.addEventListener('load', function () {
       var d = document.createElement('div');
-      d.style.cssText = 'position:fixed;left:0;right:0;bottom:0;font:11px -apple-system,sans-serif;color:#444;padding:4px 8px calc(env(safe-area-inset-bottom) + 4px);z-index:-1;white-space:pre-wrap';
+      d.style.cssText = 'position:fixed;left:8px;right:8px;top:45%;font:12px -apple-system,sans-serif;color:#fff;background:rgba(0,0,0,.6);border-radius:8px;padding:6px 8px;z-index:99999;pointer-events:none;white-space:pre-wrap';
       var ch = Object.getOwnPropertyDescriptor(Element.prototype, 'clientHeight');
       function show() {
         var vv = window.visualViewport;
@@ -162,7 +162,7 @@
         probe.style.cssText = 'position:fixed;top:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden';
         document.body.appendChild(probe);
         var cs = getComputedStyle(probe);
-        d.textContent = 'v3 standalone=' + !!navigator.standalone + ' inner=' + innerHeight + ' client=' + ch.get.call(document.documentElement) +
+        d.textContent = 'v4 standalone=' + !!navigator.standalone + ' inner=' + innerHeight + ' client=' + ch.get.call(document.documentElement) +
           ' vv=' + (vv ? Math.round(Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height').get.call(vv)) + '/' + Math.round(vv.offsetTop) : '-') +
           ' screen=' + screen.width + 'x' + screen.height + ' safe=' + cs.paddingTop + '/' + cs.paddingBottom +
           ' body=' + Math.round(document.body.getBoundingClientRect().height) + ' class=' + document.documentElement.className;
