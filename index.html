@@ -73,6 +73,7 @@
     (function () {
       if (!window.navigator.standalone) return;
       var root = document.documentElement;
+      root.classList.add('standalone');
       var ch = Object.getOwnPropertyDescriptor(Element.prototype, 'clientHeight');
       function raw() { return ch.get.call(root); }
       function full() {
@@ -97,6 +98,8 @@
   <style>
     html.stretch, html.stretch body { height: var(--full-h) !important; }
     html.stretch body { bottom: auto !important; }
+    /* iOS 27 legger en tone bak statuslinja basert på sidens bakgrunn: gjør den grønn som banneret. */
+    html.standalone, html.standalone body { background: #1B4A37; }
   </style>
   <script>
     // Lyd med Web Audio: rask respons, og «ambient» så den blander seg med musikk og
@@ -155,6 +158,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261113015303" async></script>
+  <script src="flutter_bootstrap.js?v=20261113083926" async></script>
 </body>
 </html>
