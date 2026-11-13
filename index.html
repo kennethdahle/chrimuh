@@ -123,18 +123,38 @@
       ['pointerdown', 'touchstart', 'touchend', 'click'].forEach(function (e) {
         document.addEventListener(e, unlock, true);
       });
-      function play(name) {
+      var live = {}, nextId = 1;
+      function play(name, gain) {
         var b = buf[name];
         if (!b) return null;
         unlock();
         var s = ctx.createBufferSource();
         s.buffer = b;
-        s.connect(ctx.destination);
+        if (gain) { s.connect(gain); gain.connect(ctx.destination); } else { s.connect(ctx.destination); }
         s.start();
         return s;
       }
       return {
-        note: function (n) { play('note_' + n); },
+        note: function (n) {
+          var g = ctx.createGain();
+          var s = play('note_' + n, g);
+          if (!s) return 0;
+          var id = nextId++;
+          live[id] = { s: s, g: g };
+          s.onended = function () { delete live[id]; };
+          return id;
+        },
+        // Stopp en bjelle raskt (fingeren begynte å scrolle i stedet for å trykke).
+        cancel: function (id) {
+          var x = live[id];
+          if (!x) return;
+          delete live[id];
+          var t = ctx.currentTime;
+          x.g.gain.cancelScheduledValues(t);
+          x.g.gain.setValueAtTime(x.g.gain.value, t);
+          x.g.gain.linearRampToValueAtTime(0, t + 0.03);
+          try { x.s.stop(t + 0.04); } catch (e) {}
+        },
         loop: function (on) {
           if (on) {
             if (loopSrc) return;
@@ -158,6 +178,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261113083926" async></script>
+  <script src="flutter_bootstrap.js?v=20261113084750" async></script>
 </body>
 </html>
