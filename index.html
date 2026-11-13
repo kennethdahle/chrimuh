@@ -145,30 +145,6 @@
       };
     })();
   </script>
-  <script>
-    // MIDLERTIDIG feilsøking: viser skjermmålene i en boks midt på skjermen.
-    window.addEventListener('load', function () {
-      var d = document.createElement('div');
-      d.style.cssText = 'position:fixed;left:8px;right:8px;top:45%;font:12px -apple-system,sans-serif;color:#fff;background:rgba(0,0,0,.6);border-radius:8px;padding:6px 8px;z-index:99999;pointer-events:none;white-space:pre-wrap';
-      var ch = Object.getOwnPropertyDescriptor(Element.prototype, 'clientHeight');
-      function show() {
-        var vv = window.visualViewport;
-        var probe = document.createElement('div');
-        probe.style.cssText = 'position:fixed;top:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden';
-        document.body.appendChild(probe);
-        var cs = getComputedStyle(probe);
-        d.textContent = '20261113014845 standalone=' + !!navigator.standalone + ' inner=' + innerHeight + ' client=' + ch.get.call(document.documentElement) +
-          ' vv=' + (vv ? Math.round(Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height').get.call(vv)) + '/' + Math.round(vv.offsetTop) : '-') +
-          ' screen=' + screen.width + 'x' + screen.height + ' safe=' + cs.paddingTop + '/' + cs.paddingBottom +
-          ' body=' + Math.round(document.body.getBoundingClientRect().height) + ' class=' + document.documentElement.className;
-        probe.remove();
-      }
-      document.documentElement.appendChild(d);
-      show();
-      setTimeout(show, 1500);
-      window.addEventListener('resize', show);
-    });
-  </script>
 </head>
 <body>
   <!--
@@ -179,6 +155,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261113014845" async></script>
+  <script src="flutter_bootstrap.js?v=20261113015303" async></script>
 </body>
 </html>
