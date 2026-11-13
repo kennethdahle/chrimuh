@@ -124,7 +124,16 @@
     // Lyd med Web Audio: rask respons, og «ambient» så den blander seg med musikk og
     // video i bakgrunnen (og følger lydløs-bryteren) i stedet for å pause dem.
     window.chrimuhSound = (function () {
-      try { if (navigator.audioSession) navigator.audioSession.type = 'ambient'; } catch (e) {}
+      // iOS glemmer av og til lydtypen (f.eks. etter at appen har vært i bakgrunnen),
+      // så den settes på nytt før hver lyd.
+      function ambient() {
+        try {
+          if (navigator.audioSession && navigator.audioSession.type !== 'ambient') {
+            navigator.audioSession.type = 'ambient';
+          }
+        } catch (e) {}
+      }
+      ambient();
       var Ctx = window.AudioContext || window.webkitAudioContext;
       if (!Ctx) return null;
       var ctx = new Ctx({ latencyHint: 'interactive' });
@@ -138,7 +147,8 @@
       }
       [50, 52, 54, 55, 57, 58, 60, 62, 63, 65, 67].forEach(function (n) { load('note_' + n); });
       load('loop');
-      function unlock() { if (ctx.state !== 'running') ctx.resume(); }
+      function unlock() { ambient(); if (ctx.state !== 'running') ctx.resume(); }
+      document.addEventListener('visibilitychange', ambient);
       ['pointerdown', 'touchstart', 'touchend', 'click'].forEach(function (e) {
         document.addEventListener(e, unlock, true);
       });
@@ -197,6 +207,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261113091104" async></script>
+  <script src="flutter_bootstrap.js?v=20261113091445" async></script>
 </body>
 </html>
