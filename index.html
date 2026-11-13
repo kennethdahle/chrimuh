@@ -84,11 +84,6 @@
         return d > 0 && d < 120 ? d : 0;
       }
       Object.defineProperty(root, 'clientHeight', { configurable: true, get: function () { return raw() + gap(); } });
-      var vv = window.visualViewport;
-      if (vv) {
-        var vh = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height');
-        Object.defineProperty(vv, 'height', { configurable: true, get: function () { return Math.min(vh.get.call(vv) + gap(), full()); } });
-      }
       function apply() {
         var g = gap();
         root.classList.toggle('stretch', g > 0);
@@ -162,7 +157,7 @@
         probe.style.cssText = 'position:fixed;top:0;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);visibility:hidden';
         document.body.appendChild(probe);
         var cs = getComputedStyle(probe);
-        d.textContent = '20261113014620 standalone=' + !!navigator.standalone + ' inner=' + innerHeight + ' client=' + ch.get.call(document.documentElement) +
+        d.textContent = '20261113014845 standalone=' + !!navigator.standalone + ' inner=' + innerHeight + ' client=' + ch.get.call(document.documentElement) +
           ' vv=' + (vv ? Math.round(Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height').get.call(vv)) + '/' + Math.round(vv.offsetTop) : '-') +
           ' screen=' + screen.width + 'x' + screen.height + ' safe=' + cs.paddingTop + '/' + cs.paddingBottom +
           ' body=' + Math.round(document.body.getBoundingClientRect().height) + ' class=' + document.documentElement.className;
@@ -184,6 +179,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261113014620" async></script>
+  <script src="flutter_bootstrap.js?v=20261113014845" async></script>
 </body>
 </html>
