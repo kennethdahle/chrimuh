@@ -80,15 +80,34 @@
         var portrait = window.matchMedia('(orientation: portrait)').matches;
         return portrait ? Math.max(screen.width, screen.height) : Math.min(screen.width, screen.height);
       }
-      function gap() {
-        var d = full() - raw();
-        return d > 0 && d < 120 ? d : 0;
+      // En hjemskjerm-app eier alltid hele skjermen, så høyden settes rett til skjermhøyden
+      // (iOS 26 og 27 oppgir ulike, for lave tall).
+      function height() { return Math.max(raw(), full()); }
+      Object.defineProperty(root, 'clientHeight', { configurable: true, get: height });
+      // Noen iOS-versjoner måler med visualViewport i stedet. Uten tastatur er det hele
+      // skjermen; med tastatur trekkes tastaturet fra som vanlig.
+      var vv = window.visualViewport, base = 0;
+      if (vv) {
+        var vh = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(vv), 'height');
+        var vvRaw = function () { return vh.get.call(vv); };
+        var editing = function () {
+          var a = document.activeElement;
+          return !!a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA');
+        };
+        Object.defineProperty(vv, 'height', { configurable: true, get: function () {
+          if (!editing()) { base = vvRaw(); return Math.max(base, full()); }
+          return vvRaw() + (base ? Math.max(0, full() - base) : 0);
+        } });
       }
-      Object.defineProperty(root, 'clientHeight', { configurable: true, get: function () { return raw() + gap(); } });
+      var last = 0;
       function apply() {
-        var g = gap();
-        root.classList.toggle('stretch', g > 0);
-        root.style.setProperty('--full-h', (raw() + g) + 'px');
+        var h = height();
+        root.classList.add('stretch');
+        root.style.setProperty('--full-h', h + 'px');
+        if (last && h !== last && window.visualViewport) {
+          window.visualViewport.dispatchEvent(new Event('resize'));
+        }
+        last = h;
       }
       apply();
       window.addEventListener('resize', apply);
@@ -178,6 +197,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261113085303" async></script>
+  <script src="flutter_bootstrap.js?v=20261113090118" async></script>
 </body>
 </html>
