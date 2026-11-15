@@ -1886,6 +1886,10 @@ limitations under the License.
 --------------------------------------------------------------------------------
 cross_file
 cupertino_ui
+in_app_purchase
+in_app_purchase_android
+in_app_purchase_platform_interface
+in_app_purchase_storekit
 listen
 material_ui
 path_provider
