@@ -197,6 +197,32 @@
       };
     })();
   </script>
+  <script>
+    // Hindrer at iPhone zoomer inn (f.eks. når man går ut og inn av appen med tastaturet oppe).
+    // Flutter skriver om viewport-taggen ved oppstart, så den rettes opp igjen etterpå.
+    (function () {
+      var want = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+      function fix() {
+        var metas = document.querySelectorAll('meta[name="viewport"]');
+        metas.forEach(function (m) { if (m.getAttribute('content') !== want) m.setAttribute('content', want); });
+      }
+      function reset() {
+        fix();
+        // Tving Safari til å bruke zoom 1 på nytt.
+        var m = document.querySelector('meta[name="viewport"]');
+        if (m) {
+          m.setAttribute('content', want.replace('maximum-scale=1.0', 'maximum-scale=1.01'));
+          setTimeout(fix, 50);
+        }
+        window.scrollTo(0, 0);
+      }
+      new MutationObserver(fix).observe(document.head, { childList: true, subtree: true, attributes: true, attributeFilter: ['content'] });
+      document.addEventListener('visibilitychange', function () { if (!document.hidden) { reset(); setTimeout(reset, 400); } });
+      window.addEventListener('pageshow', reset);
+      window.addEventListener('focus', reset);
+      fix();
+    })();
+  </script>
 </head>
 <body>
   <!--
@@ -207,6 +233,6 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js?v=20261115101638" async></script>
+  <script src="flutter_bootstrap.js?v=20261115112946" async></script>
 </body>
 </html>
